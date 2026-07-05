@@ -2,19 +2,15 @@
 """Telegram Video Downloader Bot — Entry Point."""
 
 import asyncio
-import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
 from config import BOT_TOKEN
 from handlers import message, callback
+from services.logger import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
-logger = logging.getLogger(__name__)
+logger = setup_logging("bot")
 
 
 async def main():
@@ -23,6 +19,8 @@ async def main():
         logger.error("BOT_TOKEN environment variable is not set!")
         return
 
+    # ponytail: MARKDOWN_V2 fijo. Si se necesita HTML o sin formato,
+    # parametrizar en config.py.
     bot = Bot(
         token=BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),

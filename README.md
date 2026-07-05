@@ -43,6 +43,15 @@ Envía cualquier enlace de video al bot y selecciona la calidad deseada mediante
 | 🐦 Twitter / X | twitter.com, x.com |
 | 👍 Facebook | facebook.com, fb.com |
 
+## Variables de Entorno
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `BOT_TOKEN` | — | **Requerido.** Token del bot de Telegram |
+| `LOG_LEVEL` | `INFO` | Nivel de logging: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `DOWNLOAD_DIR` | `./downloads` | Directorio para archivos descargados |
+| `LOG_DIR` | `logs` | Directorio para archivos de log |
+
 ## Características
 
 - ✅ Detección automática de enlaces (sin comandos)
@@ -50,6 +59,7 @@ Envía cualquier enlace de video al bot y selecciona la calidad deseada mediante
 - ✅ Descargas asíncronas (no bloquea el bot)
 - ✅ Límite de 50MB de Telegram manejado
 - ✅ Limpieza automática de archivos temporales
+- ✅ Logging con rotación (5MB por archivo, 3 backups)
 
 ## Estructura del Proyecto
 

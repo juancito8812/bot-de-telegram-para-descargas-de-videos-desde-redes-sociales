@@ -41,32 +41,29 @@ def _best_option(info: dict) -> FormatOption:
     return FormatOption(label="🎬 Mejor calidad", format_id="bestvideo+bestaudio/best")
 
 
+# ponytail: Los formatos se agrupan en solo 3 opciones fijas.
+# Si se necesita seleccion granular (e.g. elegir codec o FPS),
+# habria que exponer la lista completa de formatos de yt-dlp.
+
 def _group_formats(formats: list[dict], info: dict) -> list[FormatOption]:
     """Group available formats into 2-3 curated quality options."""
     options: list[FormatOption] = []
-
-    # 1. Best quality (video + audio merged)
     options.append(FormatOption("🎬 Mejor calidad", "bestvideo+bestaudio/best"))
-
-    # 2. Medium quality — try 720p, fall back to 480p
     medium = _find_medium_format(formats)
     if medium:
         label = f"📱 Mediana ({medium.get('height', '?')}p)"
         options.append(FormatOption(label, medium["format_id"]))
-
-    # 3. Audio only
     options.append(FormatOption("🎵 Solo audio", "bestaudio/best"))
-
     return options
 
 
 def _find_medium_format(formats: list[dict]) -> dict | None:
-    """Find a ~720p or ~480p video-only format to offer as medium quality."""
-    for height in (720, 480, 360):
-        for f in formats:
-            if f.get("height") == height and f.get("vcodec") != "none":
-                return f
-    return None
+    """Find a ~720p or ~480p video-only format."""
+    return next(
+        (f for h in (720, 480, 360) for f in formats
+         if f.get("height") == h and f.get("vcodec") != "none"),
+        None
+    )
 
 
 async def download(

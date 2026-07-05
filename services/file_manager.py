@@ -1,8 +1,10 @@
+import asyncio
 import tempfile
 import os
 from pathlib import Path
-import aiofiles
-import aiofiles.os
+
+# ponytail: aiofiles eliminado — asyncio.to_thread + os.remove basta.
+# Si se agregan mas operaciones async de I/O, reconsiderar aiofiles.
 
 
 async def ensure_download_dir(path: Path) -> None:
@@ -20,7 +22,8 @@ def get_temp_path(suffix: str = ".mp4") -> Path:
 async def cleanup_file(path: Path) -> None:
     """Delete a file if it exists. No-op if file is missing."""
     try:
-        await aiofiles.os.remove(path)
+        # ponytail: os.remove() sincrono envuelto en to_thread > aiofiles
+        await asyncio.to_thread(os.remove, path)
     except FileNotFoundError:
         pass
 
