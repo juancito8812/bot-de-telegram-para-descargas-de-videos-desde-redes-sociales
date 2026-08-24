@@ -7,4 +7,5 @@ build/
 downloads/
 logs/
 .env
+telegram-bot-api/.env
 nul

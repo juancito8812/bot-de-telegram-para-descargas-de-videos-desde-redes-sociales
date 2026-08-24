@@ -5,9 +5,10 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.telegram import TelegramAPIServer
 from aiogram.enums import ParseMode
 
-from config import BOT_TOKEN
+from config import BOT_TOKEN, TELEGRAM_API_URL
 from handlers import message, callback
 from services.logger import setup_logging
 
@@ -23,7 +24,14 @@ async def main():
     # ponytail: MARKDOWN_V2 fijo. Si se necesita HTML o sin formato,
     # parametrizar en config.py.
     # Timeout 300s para subida de archivos grandes a Telegram.
-    session = AiohttpSession(timeout=300)
+    session_kwargs = {"timeout": 300}
+    if TELEGRAM_API_URL:
+        session_kwargs["api"] = TelegramAPIServer.from_base(TELEGRAM_API_URL)
+        logger.info("Using local Bot API server: %s", TELEGRAM_API_URL)
+    else:
+        logger.info("Using Telegram Cloud API")
+
+    session = AiohttpSession(**session_kwargs)
     bot = Bot(
         token=BOT_TOKEN,
         session=session,

@@ -100,16 +100,17 @@ async def handle_quality_selection(callback: CallbackQuery):
         )
         return
 
-    # Check file size against Telegram's 50MB limit
+    # Check file size against Telegram's limit (0 = no limit with Local Bot API)
     file_size = output_path.stat().st_size
-    if not is_within_limit(file_size, MAX_FILE_SIZE):
+    if MAX_FILE_SIZE and not is_within_limit(file_size, MAX_FILE_SIZE):
+        limit_mb = MAX_FILE_SIZE / (1024 * 1024)
         logger.warning(
-            "Archivo excede 50MB | user=%s size=%.1fMB",
-            user_id, file_size / (1024 * 1024),
+            "Archivo excede limite | user=%s size=%.1fMB limit=%dMB",
+            user_id, file_size / (1024 * 1024), limit_mb,
         )
         await cleanup_file(output_path)
         await status_msg.edit_text(
-            "\u26A0\ufe0f El archivo supera los 50MB que permite Telegram\\.\n"
+            f"\u26A0\ufe0f El archivo supera los {limit_mb:.0f}MB que permite Telegram\\.\n"
             "Intenta con *Solo audio* o *Mediana* calidad\\.",
             parse_mode=ParseMode.MARKDOWN_V2,
         )

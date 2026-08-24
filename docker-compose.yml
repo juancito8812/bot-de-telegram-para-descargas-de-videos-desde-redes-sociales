@@ -1,25 +1,27 @@
 services:
+  telegram-bot-api:
+    build:
+      context: ./telegram-bot-api
+    container_name: telegram-bot-api
+    env_file:
+      - ./telegram-bot-api/.env
+    ports:
+      - "127.0.0.1:8081:8081"
+    volumes:
+      - telegram-bot-api-data:/var/lib/telegram-bot-api
+    restart: unless-stopped
+
   bot:
     build:
       context: .
-      dockerfile: Dockerfile
     container_name: telegram-downloader-bot
-    restart: always
+    env_file:
+      - .env
     environment:
-      # ── Requerido ─────────────────────────
-      - BOT_TOKEN=${BOT_TOKEN:?Se requiere BOT_TOKEN}
+      - TELEGRAM_API_URL=http://telegram-bot-api:8081
+    depends_on:
+      - telegram-bot-api
+    restart: unless-stopped
 
-      # ── Opcional ──────────────────────────
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      - DOWNLOAD_DIR=/app/downloads
-      - LOG_DIR=/app/logs
-    volumes:
-      # Persistir descargas y logs fuera del contenedor
-      - ./downloads:/app/downloads
-      - ./logs:/app/logs
-    healthcheck:
-      test: ["CMD", "pgrep", "-f", "python main.py"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+volumes:
+  telegram-bot-api-data:
