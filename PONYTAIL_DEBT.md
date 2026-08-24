@@ -2,6 +2,7 @@
 
 > Proyecto: `telegram-video-downloader-bot`
 > Generado: 2026-07-05 vía skill ponytail
+> Actualizado: 2026-08-24 — deploy en debianm700 (podman-compose)
 
 ## Deuda Actual
 
@@ -16,6 +17,15 @@
 | 7 | `tests/` | Sin tests para `downloader.py` | Los tests requieren red real (API calls lentas) | Cuando se implemente un mock de yt-dlp |
 | 8 | `handlers/callback.py` | Sin reintentos en descarga fallida | Si yt-dlp falla por timeout, el usuario recibe error y ya | Cuando sea un bot público con SLA |
 | 9 | `services/downloader.py` | `_find_medium_format` busca solo alturas fijas (720, 480, 360) | Ignora formatos con altura atípica (ej. 608p, 1080p sin 720p) | Si hay reports de "formato mediano no aparece" |
+| 10 | `Dockerfile` | HEALTHCHECK no soportado en formato OCI (podman) | Se ignora con warning, funcional pero no óptimo | Si se migra a formato Docker o se agrega healthcheck custom |
+
+## Deploy
+
+- **Host**: debianm700 (M700 ThinkCentre, 100.77.200.34)
+- **Runtime**: podman-compose (rootless, sin Docker)
+- **Service**: `telegram-bot.service` (systemd user, linger=yes)
+- **Auto-start**: enabled en boot
+- **Actualización**: `cd ~/bot-descargas && git pull && podman-compose build && podman-compose up -d`
 
 ## Principios Ponytail Aplicados
 
