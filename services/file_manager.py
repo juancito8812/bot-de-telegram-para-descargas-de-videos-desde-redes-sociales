@@ -1,5 +1,6 @@
 import asyncio
 import tempfile
+import shutil
 import os
 from pathlib import Path
 
@@ -20,10 +21,17 @@ def get_temp_path(suffix: str = ".mp4") -> Path:
 
 
 async def cleanup_file(path: Path) -> None:
-    """Delete a file if it exists. No-op if file is missing."""
+    """Delete a file or directory if it exists. No-op if missing."""
     try:
-        # ponytail: os.remove() sincrono envuelto en to_thread > aiofiles
-        await asyncio.to_thread(os.remove, path)
+        if path.is_dir():
+            await asyncio.to_thread(shutil.rmtree, path)
+        else:
+            # Also clean parent temp dir if it's the only file
+            parent = path.parent
+            await asyncio.to_thread(os.remove, path)
+            # Remove empty temp dir (mkdtemp-created)
+            if parent.exists() and not any(parent.iterdir()):
+                await asyncio.to_thread(parent.rmdir)
     except FileNotFoundError:
         pass
 

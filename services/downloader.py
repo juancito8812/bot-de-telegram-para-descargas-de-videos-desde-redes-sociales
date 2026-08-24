@@ -1,11 +1,12 @@
 import asyncio
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
 import yt_dlp
 
-from services.file_manager import get_temp_path
+from services.file_manager import ensure_download_dir
 
 
 @dataclass
@@ -73,7 +74,11 @@ async def download(
 ) -> Path:
     """Download a video using yt-dlp (runs in executor). Returns path to downloaded file."""
 
-    output_path = get_temp_path(".mp4")
+    tmp_dir = Path(tempfile.mkdtemp())
+    await ensure_download_dir(tmp_dir)
+
+    # yt-dlp creates the file; we discover it after download.
+    final_path: list[Path] = []
 
     def _progress_hook(d: dict):
         if d["status"] == "downloading":
@@ -87,17 +92,30 @@ async def download(
             )
             if progress_callback:
                 progress_callback(p)
+        elif d["status"] == "finished":
+            # yt-dlp tells us the filename it wrote
+            filename = d.get("filename", "")
+            if filename:
+                final_path.append(Path(filename))
 
     def _sync_download():
         opts = {
             "format": format_id,
-            "outtmpl": str(output_path),
+            "outtmpl": str(tmp_dir / "%(id)s.%(ext)s"),
             "quiet": True,
             "no_warnings": True,
             "progress_hooks": [_progress_hook],
+            "merge_output_format": "mp4",
         }
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([url])
-        return output_path
+
+        # Fallback: if hook didn't capture the path, find the file
+        if final_path:
+            return final_path[0]
+        files = sorted(tmp_dir.iterdir(), key=lambda f: f.stat().st_mtime, reverse=True)
+        if not files:
+            raise FileNotFoundError("yt-dlp no generó ningún archivo")
+        return files[0]
 
     return await asyncio.to_thread(_sync_download)
