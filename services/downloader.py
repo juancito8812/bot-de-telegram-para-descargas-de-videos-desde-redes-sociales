@@ -105,8 +105,16 @@ async def download(
             "quiet": True,
             "no_warnings": True,
             "progress_hooks": [_progress_hook],
-            "merge_output_format": "mp4",
         }
+        # Si es audio, convertir a MP3 con mejor calidad.
+        if "audio" in format_id:
+            opts["postprocessors"] = [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": "mp3",
+                "preferredquality": "0",
+            }]
+        else:
+            opts["merge_output_format"] = "mp4"
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([url])
 
