@@ -118,9 +118,7 @@ async def download(
         with yt_dlp.YoutubeDL(opts) as ydl:
             ydl.download([url])
 
-        # Fallback: if hook didn't capture the path, find the file
-        if final_path:
-            return final_path[0]
+        # Buscar el archivo final (postprocessor puede cambiar la extensión)
         files = sorted(tmp_dir.iterdir(), key=lambda f: f.stat().st_mtime, reverse=True)
         if not files:
             raise FileNotFoundError("yt-dlp no generó ningún archivo")
