@@ -4,6 +4,7 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 
 from config import BOT_TOKEN
@@ -21,8 +22,11 @@ async def main():
 
     # ponytail: MARKDOWN_V2 fijo. Si se necesita HTML o sin formato,
     # parametrizar en config.py.
+    # Timeout 300s para subida de archivos grandes a Telegram.
+    session = AiohttpSession(timeout=300)
     bot = Bot(
         token=BOT_TOKEN,
+        session=session,
         default=DefaultBotProperties(parse_mode=ParseMode.MARKDOWN_V2),
     )
     dp = Dispatcher()

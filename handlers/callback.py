@@ -122,8 +122,12 @@ async def handle_quality_selection(callback: CallbackQuery):
             parse_mode=ParseMode.MARKDOWN_V2,
         )
         input_file = FSInputFile(output_path)
-        await callback.message.reply_video(input_file)
-        logger.info("Video enviado | user=%s size=%.1fMB", user_id, file_size / (1024 * 1024))
+        is_audio = "audio" in format_id
+        if is_audio:
+            await callback.message.reply_audio(input_file)
+        else:
+            await callback.message.reply_video(input_file)
+        logger.info("Archivo enviado | user=%s size=%.1fMB audio=%s", user_id, file_size / (1024 * 1024), is_audio)
         await status_msg.edit_text(
             "\u2705 *Listo\\!*",
             parse_mode=ParseMode.MARKDOWN_V2,
