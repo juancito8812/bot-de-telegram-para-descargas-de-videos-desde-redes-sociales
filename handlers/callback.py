@@ -95,7 +95,7 @@ async def handle_quality_selection(callback: CallbackQuery):
     except Exception as e:
         logger.error("Error en descarga | user=%s error=%s", user_id, e)
         await status_msg.edit_text(
-            f"\u274c *Error al descargar:* {str(e)}",
+            "\u274c *Error al descargar*",
             parse_mode=ParseMode.MARKDOWN_V2,
         )
         return
@@ -131,7 +131,7 @@ async def handle_quality_selection(callback: CallbackQuery):
     except Exception as e:
         logger.error("Error al enviar video | user=%s error=%s", user_id, e)
         await status_msg.edit_text(
-            f"\u274c *Error al enviar:* {str(e)}",
+            "\u274c *Error al enviar*",
             parse_mode=ParseMode.MARKDOWN_V2,
         )
     finally:
