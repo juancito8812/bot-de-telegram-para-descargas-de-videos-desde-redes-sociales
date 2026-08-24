@@ -3,6 +3,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, FSInputFile
 from aiogram.enums import ParseMode
 
+from handlers.message import get_pending
 from services.downloader import download, DownloadProgress
 from services.file_manager import cleanup_file, is_within_limit, ensure_download_dir
 from config import DOWNLOAD_DIR, MAX_FILE_SIZE
@@ -16,12 +17,23 @@ router = Router()
 async def handle_quality_selection(callback: CallbackQuery):
     """Download the video with the selected quality and send it to the chat."""
     await callback.answer()
-    # callback_data format: dl|||<format_id>|||<url>
+    # callback_data format: dl|||<short_key>
     parts = callback.data.split("|||", 2)
-    if len(parts) < 3:
+    if len(parts) < 2:
         logger.warning("callback_data con formato invalido: %s", callback.data)
         return
-    _, format_id, url = parts
+    _, short_key = parts[0], parts[1]
+
+    pending = get_pending(short_key)
+    if not pending:
+        await callback.message.edit_text(
+            "\u274c *Sesion expirada\\.* Envia el enlace de nuevo\\.",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+        return
+
+    url = pending["url"]
+    format_id = pending["format_id"]
 
     user_id = callback.from_user.id if callback.from_user else 0
     logger.info(
